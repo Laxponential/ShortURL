@@ -39,11 +39,11 @@ func ShortenURL(rdb *redis.Client) gin.HandlerFunc {
 
 		slug := generateShortURL(urlSize)
 
-		shortURL := fmt.Sprintf("short.ly/%s", slug)
+		shortURL := fmt.Sprintf("http://localhost:8123/%s", slug)
 
 		ctx := context.Background()
 		// store to redis
-		if err := rdb.Set(ctx, shortURL, urlBody.Url, 0).Err(); err != nil {
+		if err := rdb.Set(ctx, slug, urlBody.Url, 0).Err(); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "could not save to redis",
 			})
@@ -53,5 +53,27 @@ func ShortenURL(rdb *redis.Client) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "URL generated: " + shortURL,
 		})
+	}
+}
+
+func ResolveURL(rdb *redis.Client) gin.HandlerFunc {
+
+	return func(c *gin.Context) {
+
+		shortURL := c.Param("slug")
+		ctx := context.Background()
+		origURL, err := rdb.Get(ctx, shortURL).Result()
+
+		if err == redis.Nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "url not found",
+			})
+		} else if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "redis error",
+			})
+		} else {
+			c.Redirect(http.StatusFound, origURL)
+		}
 	}
 }

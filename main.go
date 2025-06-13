@@ -19,7 +19,7 @@ func main() {
 	// post url to shortenize the url
 	// get url to fetch the url
 	r.POST("/", handler.ShortenURL(redisClient))
-	r.GET("/")
+	r.GET("/:slug", handler.ResolveURL(redisClient))
 
 	r.Run(":8123")
 }
