@@ -1,6 +1,10 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"shortURL/handler"
+
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
 
@@ -11,7 +15,7 @@ func main() {
 	// post url to shortenize the url
 	// get url to fetch the url
 
-	r.POST("/")
+	r.POST("/", handler.ShortenURL())
 	r.GET("/")
 
 	r.Run(":8123")
