@@ -1,11 +1,17 @@
 package main
 
 import (
+	"os"
 	"shortURL/cache"
 	"shortURL/handler"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	_ = godotenv.Load() // only needed for local dev (non-docker runs)
+}
 
 func main() {
 
@@ -21,5 +27,11 @@ func main() {
 	r.POST("/", handler.ShortenURL(redisClient))
 	r.GET("/:slug", handler.ResolveURL(redisClient))
 
-	r.Run(":8123")
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "8123"
+	}
+
+	r.Run(":" + port)
 }
